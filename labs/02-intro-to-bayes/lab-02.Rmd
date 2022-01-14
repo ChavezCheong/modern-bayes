@@ -58,11 +58,21 @@ You have a rough sketch of what you should do for this part of the assignment. T
 # Input: obs.data, theta
 # Output: bernoulli likelihood
 
+bernoulliLHFunction <- function(obs.data, theta) {
+  x <- sum(obs.data)
+  n <- length(obs.data)
+  like <- dbeta(theta, x+1, n-x+1)
+  return(like)
+}
+
 
 ### Plot LH for a grid of theta values ###
 # Create the grid #
 # Store the LH values
 # Create the Plot
+theta <- seq(0, 1, length = 1000)
+like <- bernoulliLHFunction(obs.data, theta)
+plot(theta, like, type = "l", ylab = "Density", lty = 3, lwd = 3, xlab = expression(theta))
 ```
 
 
@@ -71,8 +81,56 @@ You have a rough sketch of what you should do for this part of the assignment. T
 
 Write a function that takes as its inputs  prior parameters \textsf{a} and \textsf{b} for the Beta-Bernoulli model and the observed data, and produces the posterior parameters you need for the model. \textbf{Generate and print} the posterior parameters for a non-informative prior i.e. \textsf{(a,b) = (1,1)} and for an informative case \textsf{(a,b) = (3,1)}}.
 
+```{r}
+betabernoulliPosteriorFunction <- function(a, b, obs.data) {
+  x <- sum(obs.data)
+  n <- length(obs.data)
+  posterior.a <- x + a
+  posterior.b <- n - x + b
+  return(c(posterior.a, posterior.b))
+}
+```
 
+Non-Informative Prior
+
+```{r}
+betabernoulliPosteriorFunction(1, 1, obs.data)
+```
+
+Informative Prior
+
+```{r}
+betabernoulliPosteriorFunction(3, 1, obs.data)
+```
 
 # Task 5 (To be completed for homework)
 
 Create two plots, one for the informative and one for the non-informative case to show the posterior distribution and superimpose the prior distributions on each along with the likelihood. What do you see? Remember to turn the y-axis ticks off since superimposing may make the scale non-sense.
+
+
+```{r}
+informative.posterior.a <- betabernoulliPosteriorFunction(3, 1, obs.data)[1]
+informative.posterior.b <- betabernoulliPosteriorFunction(3, 1, obs.data)[2]
+noninformative.posterior.a <- betabernoulliPosteriorFunction(1, 1, obs.data)[1]
+noninformative.posterior.b <- betabernoulliPosteriorFunction(1, 1, obs.data)[2]
+informative.posterior <- dbeta(theta, informative.posterior.a, informative.posterior.b)
+noninformative.posterior <- dbeta(theta, noninformative.posterior.a, noninformative.posterior.b)
+informative.prior <- dbeta(theta, 3, 1)
+noninformative.prior <- dbeta(theta, 1, 1)
+plot(theta, like, type = "l", ylab = "Density", lty = 1, lwd = 3, xlab = expression(theta))
+par(new =  TRUE)
+plot(theta, noninformative.prior, ylab = "", yaxt = "n", lty = 3, lwd = 3, xlab = "", type = "l")
+par(new = TRUE)
+plot(theta, noninformative.posterior, ylab = "", yaxt = "n", lty = 2, lwd = 3, xlab = "", type = "l")
+legend(0.1, 14, c("Prior", "Likelihood", "Posterior"), lty = c(3,1,2), lwd = c(3,3,3))
+```
+
+```{r}
+plot(theta, like, type = "l", ylab = "Density", lty = 1, lwd = 3, xlab = expression(theta))
+par(new =  TRUE)
+plot(theta, informative.prior, ylab = "", yaxt = "n", lty = 3, lwd = 3, xlab = "", type = "l")
+par(new = TRUE)
+plot(theta, informative.posterior, ylab = "", yaxt = "n", lty = 2, lwd = 3, xlab = "", type = "l")
+legend(0.1, 14, c("Prior", "Likelihood", "Posterior"), lty = c(3,1,2), lwd = c(3,3,3))
+```
+
